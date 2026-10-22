@@ -1,0 +1,6 @@
+mode: dry-run
+allowed_action: block_ip
+target: local_lab_blocklist_file
+require_human_approval: true
+rollback: python scripts/rollback-lab-block.py <public-ip>
+# This policy is documentation for humans; the implementation hardcodes the action boundary.

@@ -1,0 +1,5 @@
+[
+  {"id":"fixture-1","timestamp":"2026-01-01T00:00:00Z","rule":{"id":"5710","level":10,"description":"Synthetic repeated authentication failures"},"agent":{"id":"001","name":"agent-redacted"},"data":{"srcip":"198.51.100.45","url":"https://malware.example.net/login"},"full_log":"Synthetic lab event involving 198.51.100.45; hash 44d88612fea8a8f36de82e1278abb02f"},
+  {"id":"fixture-2","timestamp":"2026-01-01T00:00:01Z","rule":{"id":"100101","level":8,"description":"Synthetic suspicious DNS lookup"},"agent":{"id":"002","name":"agent-redacted"},"data":{"domain":"phishing.example.org","dstip":"203.0.113.77"},"full_log":"Synthetic DNS event for phishing.example.org"},
+  {"id":"fixture-3","timestamp":"2026-01-01T00:00:02Z","rule":{"id":"100102","level":12,"description":"Synthetic file hash detection"},"agent":{"id":"003","name":"agent-redacted"},"data":{"sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},"full_log":"Synthetic file hash observed on lab endpoint"}
+]

@@ -1,0 +1,39 @@
+{
+  "name": "SOC Wazuh Human Approved Response",
+  "nodes": [
+    {
+      "parameters": {"httpMethod": "POST", "path": "wazuh-alert", "responseMode": "lastNode", "authentication": "headerAuth", "options": {}},
+      "id": "52b7b60b-373c-47f8-a0f7-4529d3031001",
+      "name": "Wazuh Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "soc-wazuh-alert",
+      "credentials": {"httpHeaderAuth": {"id": "soc-automation-token", "name": "SOC Automation API Token"}}
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://python-service:8080/webhook/wazuh",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {"timeout": 30000}
+      },
+      "id": "52b7b60b-373c-47f8-a0f7-4529d3031002",
+      "name": "Python SOC Pipeline",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [500, 300],
+      "credentials": {"httpHeaderAuth": {"id": "soc-automation-token", "name": "SOC Automation API Token"}}
+    }
+  ],
+  "connections": {"Wazuh Webhook": {"main": [[{"node": "Python SOC Pipeline", "type": "main", "index": 0}]]}},
+  "active": false,
+  "settings": {"executionOrder": "v1", "timezone": "Europe/Paris"},
+  "versionId": "d79745d5-108c-4a99-a480-842b1c393110",
+  "meta": {"templateCredsSetupCompleted": false},
+  "tags": []
+}

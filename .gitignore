@@ -1,0 +1,11 @@
+.env
+*.py[cod]
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.test-tmp/
+.venv/
+*.sqlite
+*.jsonl
+data/
+benchmark-results.json

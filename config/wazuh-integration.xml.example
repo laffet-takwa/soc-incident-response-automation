@@ -1,0 +1,8 @@
+<!-- Add inside /var/ossec/etc/ossec.conf under <ossec_config>. -->
+<integration>
+  <name>custom-soc-automation</name>
+  <api_key>REPLACE_WITH_AUTOMATION_API_TOKEN</api_key>
+  <hook_url>http://AUTOMATION_HOST:8080/webhook/wazuh</hook_url>
+  <level>7</level>
+  <alert_format>json</alert_format>
+</integration>

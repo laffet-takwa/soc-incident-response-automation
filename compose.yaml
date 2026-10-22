@@ -1,0 +1,79 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    volumes: ["elasticsearch-data:/usr/share/elasticsearch/data"]
+    restart: unless-stopped
+  cassandra:
+    image: cassandra:4
+    environment:
+      CASSANDRA_CLUSTER_NAME: soc-lab
+      MAX_HEAP_SIZE: "1024M"
+      HEAP_NEWSIZE: "256M"
+    volumes: ["cassandra-data:/var/lib/cassandra/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'SELECT release_version FROM system.local' >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+    restart: unless-stopped
+  thehive:
+    image: strangebee/thehive:5.6.3
+    depends_on:
+      elasticsearch: {condition: service_started}
+      cassandra: {condition: service_healthy}
+    environment:
+      TH_INDEX_BACKEND: elasticsearch
+      TH_ELASTICSEARCH_HOSTNAMES: elasticsearch
+      TH_CQL_HOSTNAMES: cassandra
+      TH_CQL_WAIT: "0"
+    ports: ["127.0.0.1:9000:9000"]
+    restart: unless-stopped
+  python-service:
+    build: .
+    ports: ["8080:8080"]
+    env_file: [.env]
+    environment:
+      AUDIT_LOG_PATH: /data/audit.jsonl
+      CACHE_PATH: /data/cache.sqlite
+      LAB_BLOCKLIST_PATH: /data/lab-blocklist.txt
+      ENRICH_PUBLIC_IOCS: ${ENRICH_PUBLIC_IOCS:-false}
+      DRY_RUN: ${DRY_RUN:-true}
+    volumes: ["soc-data:/data", "./config:/app/config:ro"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:2.44.5
+    ports: ["5678:5678"]
+    environment:
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-replace-this-demo-value}
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_PERSONALIZATION_ENABLED: "false"
+      N8N_SECURE_COOKIE: "false"
+      GENERIC_TIMEZONE: Europe/Paris
+    volumes: ["n8n-data:/home/node/.n8n"]
+    restart: unless-stopped
+  mock-alert-generator:
+    build: .
+    command: ["python", "scripts/replay_demo.py", "--count", "30", "--url", "http://python-service:8080/webhook/wazuh", "--output", "benchmarks/latest-run.json"]
+    env_file: [.env]
+    environment: {PYTHONPATH: /app/src}
+    volumes: ["./scripts:/app/scripts:ro", "./tests/fixtures:/app/tests/fixtures:ro", "./benchmarks:/app/benchmarks"]
+    depends_on:
+      python-service: {condition: service_healthy}
+    profiles: [demo]
+
+volumes:
+  soc-data:
+  n8n-data:
+  elasticsearch-data:
+  cassandra-data:
+

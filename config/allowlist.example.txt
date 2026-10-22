@@ -1,0 +1,4 @@
+# Add indicators that must never be enriched, one per line.
+example.org
+*.corp.example.com
+203.0.113.10
