@@ -15,12 +15,12 @@ flowchart LR
   W[Wazuh / synthetic replay] -->|Bearer-auth JSON webhook| S[Python Flask service]
   N[n8n Webhook workflow] -->|HTTP Request node| S
   S --> X[Validate, allowlist, sanitize]
-  X -->|public IOCs only; opt-in| T[VT / AbuseIPDB / OTX]
+  X -->|opt-in public IOCs| T[VT / AbuseIPDB / OTX]
   T --> R[Risk scoring + coverage]
   R --> H[TheHive 5 alert]
   R --> M[Slack / Telegram buttons]
   M -->|signed callback or authenticated API| A{Human decision}
-  A -->|Reject / expire| L[Audit; no response]
+  A -->|Reject / expire| L[Audit without response]
   A -->|Approve| D[Dry run or lab blocklist file]
 ```
 
@@ -39,14 +39,14 @@ sequenceDiagram
     P->>I: Public indicators only (cached, rate limited)
     I-->>P: Reports or source-specific failure
   end
-  P->>P: Score available signals; record stage timestamps
+  P->>P: Score signals and record stage timestamps
   P->>H: Create TheHive alert with observables and summary
   P-->>A: Notification with Approve / Reject actions
   A->>P: Explicit decision and actor
   alt Approved
-    P->>P: Dry run or write lab blocklist; audit and rollback
+    P->>P: Dry run or write lab blocklist, then audit and provide rollback
   else Rejected or expired
-    P->>P: Audit decision; no response action
+    P->>P: Audit the decision without running a response action
   end
 ```
 
